@@ -3,7 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.List;
 
-public class King extends ChessPiece{
+public class King extends ChessPiece {
     public King(int x, int y, Team team) {
         super(x, y, team);
     }
@@ -12,27 +12,28 @@ public class King extends ChessPiece{
     public List<int[]> possibleMoves() {
         List<int[]> list = new ArrayList<>();
 
-        if(x < 7 && y < 7){
-            list.add(new int[]{x+1, y+1});
-            list.add(new int[]{x+1, y});
-            list.add(new int[]{x, y+1});
+        for (int i = x - 1; i < x + 1; i++) {
+            if (i < 0 || i > 7) continue;
+            for (int j = y - 1; j < y + 1; j++) {
+                if (j < 0 || j > 7) continue;
+                list.add(new int[]{i, j});
+            }
         }
-
-        if(x > 0 && y > 0){
-            list.add(new int[]{x-1, y-1});
-            list.add(new int[]{x-1, y});
-            list.add(new int[]{x, y-1});
-        }
-
-        if(x > 0 && y < 7){
-            list.add(new int[]{x-1, y+1});
-        }
-
-        if(x < 7 && y > 0){
-            list.add(new int[]{x+1, y-1});
-        }
-
 
         return list;
+    }
+
+    @Override
+    public boolean move(ChessBoard board, int xnew, int ynew){
+        if(Math.abs(ynew - y) != 1 && Math.abs(xnew - x) != 1)
+            return false;
+
+        ChessPiece c = board.getPiece(xnew, ynew);
+        if(c == null || c.getTeam() != this.team){
+            board.setPiece(this, xnew, ynew);
+            board.setPiece(null, x, y);
+            return true;
+        }
+        return false;
     }
 }

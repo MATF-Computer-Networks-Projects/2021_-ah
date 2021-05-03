@@ -23,4 +23,47 @@ public class Rook extends ChessPiece{
         }
         return list;
     }
+
+    @Override
+    public boolean move(ChessBoard board, int xnew, int ynew){
+
+        if(xnew!=x && ynew != y)
+            return false;
+
+        if(xnew != x){
+           int dif = xnew-x;
+
+           //da li postoje figure na putu do odabranog polja?
+           for (int i=1; i<Math.abs(dif);i++){
+               if(board.getPiece(x+Integer.signum(dif)*i, y) != null)
+                   return false;
+           }
+
+           //da li postoji figura na odabranu polju? ako postoji, proverava da li pripada suprotnom timu i "jede" je
+           ChessPiece c = board.getPiece(xnew, ynew);
+
+           if(c == null || c.getTeam() != this.team){
+                board.setPiece(this, xnew, ynew);
+                board.setPiece(null, x, y);
+                return true;
+           }
+        }
+
+        if(ynew != y){
+            int dif = ynew-y;
+            for (int i=1; i<Math.abs(dif);i++){
+                if(board.getPiece(x, y+Integer.signum(dif)*i) != null)
+                    return false;
+            }
+
+            ChessPiece c = board.getPiece(xnew, ynew);
+
+            if(c == null || c.getTeam() != this.team){
+                board.setPiece(this, xnew, ynew);
+                board.setPiece(null, x, y);
+                return true;
+            }
+        }
+        return false;
+    }
 }

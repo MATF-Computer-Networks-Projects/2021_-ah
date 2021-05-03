@@ -10,20 +10,8 @@ public class ChessBoard {
         return pieces[x][y];
     }
 
-
-
-
-
-    //Provera da li je potez iz move() metode dozvoljen
-    public void isLegalMove(int x, int y, int xnew, int ynew){
-
-
-    }
-
-    //Pomeranje figure
-    public void move(int x, int y, int xnew, int ynew){
-
-
+    public void setPiece(ChessPiece piece, int x, int y){
+        pieces[x][y] = piece;
     }
 
 

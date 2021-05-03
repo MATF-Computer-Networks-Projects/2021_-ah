@@ -50,4 +50,9 @@ public class Knight extends ChessPiece{
 
         return list;
     }
+
+    @Override
+    public boolean move(ChessBoard board, int xnew, int ynew){
+
+    }
 }

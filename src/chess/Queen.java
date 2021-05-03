@@ -23,38 +23,42 @@ public class Queen extends ChessPiece{
             }
         }
 
-        i = x;
-        int j = y;
-        while(i<7 && j<7){
-            i++;
-            j++;
-            list.add(new int[]{i, j});
-        }
+        int dif = Math.abs(x-y);
 
-        i = x;
-        j = y;
-        while(i<7 && j>0){
-            i++;
-            j--;
-            list.add(new int[]{i, j});
-        }
+        if(x<y)
+            for (i = 0; i + dif < 8; i++) {
+                if(i==x && i+dif == y)
+                    continue;
+                list.add(new int[]{i, i+dif});
+            }
+        else
+            for (i = 0; i + dif < 8; i++) {
+                if(i+dif==x && i == y)
+                    continue;
+                list.add(new int[]{i + dif, i});
+            }
 
-        i = x;
-        j = y;
-        while(i>0 && j<7){
-            i--;
-            j++;
-            list.add(new int[]{i, j});
-        }
+        //Inverzna dijagonala
+        dif = Math.abs(7-y-x);
 
-        i = x;
-        j = y;
-        while(i>0 && j>0){
-            i--;
-            j--;
-            list.add(new int[]{i, j});
-        }
+        if(x<7-y)
+            for(i = 0; 7-i-dif >= 0; i++){
+                if(7-i-dif==x && i == y)
+                    continue;
+                list.add(new int[]{7-i-dif, i});
+            }
+        else
+            for(i = 0; i+dif < 8; i++){
+                if(7-i==x && i+dif == y)
+                    continue;
+                list.add(new int[]{7-i, i+dif});
+            }
 
         return list;
+    }
+
+    @Override
+    public boolean move(ChessBoard board, int xnew, int ynew){
+
     }
 }

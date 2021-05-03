@@ -17,6 +17,8 @@ public abstract class ChessPiece {
     //Vraca sva polja gde odabrana figura moze biti pomerena
     public abstract List<int[]> possibleMoves();
 
+    //Pomeranje figure
+    public abstract boolean move(ChessBoard board, int xnew, int ynew);
 
     public Team getTeam() {
         return team;
