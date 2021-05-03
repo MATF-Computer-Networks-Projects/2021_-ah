@@ -84,6 +84,28 @@ public class Bishop extends ChessPiece{
 
     @Override
     public boolean move(ChessBoard board, int xnew, int ynew){
-            
+
+        int difx = xnew-x;
+        int dify = ynew-y;
+
+        //Da li se novo polje nalazi na nekoj od dijagonala iz odabranog polja
+        if(Math.abs(difx) != Math.abs(dify))
+            return false;
+
+        for(int i=1; i<difx; i++)
+            if(board.getPiece(x+Integer.signum(difx)*i, y+Integer.signum(dify)*i) != null)
+                return false;
+
+        ChessPiece c = board.getPiece(xnew, ynew);
+
+        if (c == null || c.getTeam() != this.team){
+            board.setPiece(this, xnew, ynew);
+            board.setPiece(null, x, y);
+            return true;
+        }
+
+
+
+        return false;
     }
 }

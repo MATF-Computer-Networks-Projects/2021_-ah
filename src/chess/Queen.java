@@ -59,6 +59,56 @@ public class Queen extends ChessPiece{
 
     @Override
     public boolean move(ChessBoard board, int xnew, int ynew){
+        int difx = xnew-x;
+        int dify = ynew-y;
 
+        //Ako treba da se krece dijagonalno
+        if(Math.abs(difx) == Math.abs(dify)) {
+
+            for (int i = 1; i < difx; i++)
+                if (board.getPiece(x + Integer.signum(difx) * i, y + Integer.signum(dify) * i) != null)
+                    return false;
+
+            ChessPiece c = board.getPiece(xnew, ynew);
+
+            if (c == null || c.getTeam() != this.team) {
+                board.setPiece(this, xnew, ynew);
+                board.setPiece(null, x, y);
+                return true;
+            }
+        }
+
+        //Ako treba da se krece vodoravno ili uspravno
+        if(xnew != x && ynew == y){
+
+            //da li postoje figure na putu do odabranog polja?
+            for (int i=1; i<Math.abs(difx);i++){
+                if(board.getPiece(x+Integer.signum(difx)*i, y) != null)
+                    return false;
+            }
+
+            //da li postoji figura na odabranu polju? ako postoji, proverava da li pripada suprotnom timu i "jede" je
+            ChessPiece c = board.getPiece(xnew, ynew);
+
+            if(c == null || c.getTeam() != this.team){
+                board.setPiece(this, xnew, ynew);
+                board.setPiece(null, x, y);
+                return true;
+            }
+        } else if (ynew != y && xnew == x){
+            for (int i=1; i<Math.abs(dify);i++){
+                if(board.getPiece(x, y+Integer.signum(dify)*i) != null)
+                    return false;
+            }
+
+            ChessPiece c = board.getPiece(xnew, ynew);
+
+            if(c == null || c.getTeam() != this.team){
+                board.setPiece(this, xnew, ynew);
+                board.setPiece(null, x, y);
+                return true;
+            }
+        }
+        return false;
     }
 }

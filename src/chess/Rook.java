@@ -47,9 +47,7 @@ public class Rook extends ChessPiece{
                 board.setPiece(null, x, y);
                 return true;
            }
-        }
-
-        if(ynew != y){
+        } else if (ynew != y){
             int dif = ynew-y;
             for (int i=1; i<Math.abs(dif);i++){
                 if(board.getPiece(x, y+Integer.signum(dif)*i) != null)
