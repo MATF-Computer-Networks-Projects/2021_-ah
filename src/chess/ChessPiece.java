@@ -20,6 +20,8 @@ public abstract class ChessPiece {
     //Pomeranje figure
     public abstract boolean move(ChessBoard board, int xnew, int ynew);
 
+    public abstract String getType();
+
     public Team getTeam() {
         return team;
     }

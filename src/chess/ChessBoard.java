@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ChessBoard {
@@ -42,5 +43,36 @@ public class ChessBoard {
             }
         }
 
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        for(int j=7; j>=0; j--){
+            s.append("|");
+            for(int i=0; i<8; i++){
+                if(pieces[i][j]==null){
+                    s.append(" ");
+                } else if (Rook.class.equals(pieces[i][j].getClass())) {
+                    s.append("R");
+                } else if (Knight.class.equals(pieces[i][j].getClass())) {
+                    s.append("N");
+                } else if (Bishop.class.equals(pieces[i][j].getClass())) {
+                    s.append("B");
+                } else if (Pawn.class.equals(pieces[i][j].getClass())) {
+                    s.append("P");
+                } else if (Queen.class.equals(pieces[i][j].getClass())) {
+                    s.append("Q");
+                } else if (King.class.equals(pieces[i][j].getClass())) {
+                    s.append("K");
+                } else{
+                    s.append("?");
+                }
+                s.append("|");
+            }
+            s.append("\n");
+        }
+        return s.toString();
     }
 }

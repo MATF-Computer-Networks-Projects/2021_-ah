@@ -30,6 +30,7 @@ public class Rook extends ChessPiece{
         if(xnew!=x && ynew != y)
             return false;
 
+        //Pomeranje po x osi
         if(xnew != x){
            int dif = xnew-x;
 
@@ -45,8 +46,11 @@ public class Rook extends ChessPiece{
            if(c == null || c.getTeam() != this.team){
                 board.setPiece(this, xnew, ynew);
                 board.setPiece(null, x, y);
+                x = xnew;
+                y = ynew;
                 return true;
            }
+        //Pomeranje po y osi
         } else if (ynew != y){
             int dif = ynew-y;
             for (int i=1; i<Math.abs(dif);i++){
@@ -59,9 +63,16 @@ public class Rook extends ChessPiece{
             if(c == null || c.getTeam() != this.team){
                 board.setPiece(this, xnew, ynew);
                 board.setPiece(null, x, y);
+                x = xnew;
+                y = ynew;
                 return true;
             }
         }
         return false;
+    }
+
+
+    public String getType(){
+        return "Rook";
     }
 }

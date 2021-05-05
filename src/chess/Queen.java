@@ -65,7 +65,7 @@ public class Queen extends ChessPiece{
         //Ako treba da se krece dijagonalno
         if(Math.abs(difx) == Math.abs(dify)) {
 
-            for (int i = 1; i < difx; i++)
+            for (int i = 1; i < Math.abs(difx); i++)
                 if (board.getPiece(x + Integer.signum(difx) * i, y + Integer.signum(dify) * i) != null)
                     return false;
 
@@ -74,6 +74,8 @@ public class Queen extends ChessPiece{
             if (c == null || c.getTeam() != this.team) {
                 board.setPiece(this, xnew, ynew);
                 board.setPiece(null, x, y);
+                x = xnew;
+                y = ynew;
                 return true;
             }
         }
@@ -93,6 +95,8 @@ public class Queen extends ChessPiece{
             if(c == null || c.getTeam() != this.team){
                 board.setPiece(this, xnew, ynew);
                 board.setPiece(null, x, y);
+                x = xnew;
+                y = ynew;
                 return true;
             }
         } else if (ynew != y && xnew == x){
@@ -106,9 +110,15 @@ public class Queen extends ChessPiece{
             if(c == null || c.getTeam() != this.team){
                 board.setPiece(this, xnew, ynew);
                 board.setPiece(null, x, y);
+                x = xnew;
+                y = ynew;
                 return true;
             }
         }
         return false;
+    }
+
+    public String getType(){
+        return "Queen";
     }
 }

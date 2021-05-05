@@ -92,7 +92,7 @@ public class Bishop extends ChessPiece{
         if(Math.abs(difx) != Math.abs(dify))
             return false;
 
-        for(int i=1; i<difx; i++)
+        for(int i=1; i<Math.abs(difx); i++)
             if(board.getPiece(x+Integer.signum(difx)*i, y+Integer.signum(dify)*i) != null)
                 return false;
 
@@ -101,11 +101,17 @@ public class Bishop extends ChessPiece{
         if (c == null || c.getTeam() != this.team){
             board.setPiece(this, xnew, ynew);
             board.setPiece(null, x, y);
+            x = xnew;
+            y = ynew;
             return true;
         }
 
 
 
         return false;
+    }
+
+    public String getType(){
+        return "Bishop";
     }
 }

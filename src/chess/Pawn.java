@@ -26,8 +26,27 @@ public class Pawn extends ChessPiece{
 
     @Override
     public boolean move(ChessBoard board, int xnew, int ynew){
-        if(ynew - y != 1)
-            return false;
+
+        switch(Math.abs(ynew - y)){
+            case 2:
+                if(!((y==6 && team == Team.BLACK) || (y==1 && team == Team.WHITE)))
+                    return false;
+                break;
+            case 1:
+                break;
+            default:
+                return false;
+        }
+
+        //Pion ne sme da se krece unazad
+        switch(team){
+            case BLACK:
+                if(ynew > y)
+                    return false;
+            case WHITE:
+                if(ynew < y)
+                    return false;
+        }
 
         ChessPiece c = board.getPiece(xnew, ynew);
 
@@ -37,19 +56,27 @@ public class Pawn extends ChessPiece{
                 if(c != null && c.getTeam() != this.team){
                     board.setPiece(this, xnew, ynew);
                     board.setPiece(null, x, y);
+                    x = xnew;
+                    y = ynew;
                     return true;
                 }
-                else return false;
+                return false;
+            //Pomera se napred
             case 0:
-                c = board.getPiece(xnew, ynew);
                 if(c == null){
                     board.setPiece(this, xnew, ynew);
                     board.setPiece(null, x, y);
+                    x = xnew;
+                    y = ynew;
                     return true;
                 }
-                else return false;
+                return false;
 
             default: return false;
         }
+    }
+
+    public String getType(){
+        return "Pawn";
     }
 }
