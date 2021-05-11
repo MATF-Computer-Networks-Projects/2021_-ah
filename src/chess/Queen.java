@@ -119,6 +119,6 @@ public class Queen extends ChessPiece{
     }
 
     public String getType(){
-        return "Queen";
+        return "queen";
     }
 }

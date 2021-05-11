@@ -55,6 +55,10 @@ public class Knight extends ChessPiece{
     public boolean move(ChessBoard board, int xnew, int ynew){
         ChessPiece c = board.getPiece(xnew, ynew);
 
+        if(Math.abs(xnew-x)*Math.abs(ynew-y)!=2){
+            return false;
+        }
+
         if(c == null || c.getTeam() != this.team){
             board.setPiece(this, xnew, ynew);
             board.setPiece(null, x, y);
@@ -66,6 +70,6 @@ public class Knight extends ChessPiece{
     }
 
     public String getType(){
-        return "Knight";
+        return "knight";
     }
 }

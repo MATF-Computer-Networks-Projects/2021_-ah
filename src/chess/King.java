@@ -40,6 +40,6 @@ public class King extends ChessPiece {
     }
 
     public String getType(){
-        return "King";
+        return "king";
     }
 }

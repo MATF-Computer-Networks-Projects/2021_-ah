@@ -25,4 +25,13 @@ public abstract class ChessPiece {
     public Team getTeam() {
         return team;
     }
+
+    public String getImgFile(){
+        String teamChar;
+        if(team == Team.WHITE)
+            teamChar = "w";
+        else
+            teamChar = "b";
+        return this.getType()+teamChar;
+    }
 }

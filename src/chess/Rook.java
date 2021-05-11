@@ -73,6 +73,6 @@ public class Rook extends ChessPiece{
 
 
     public String getType(){
-        return "Rook";
+        return "rook";
     }
 }

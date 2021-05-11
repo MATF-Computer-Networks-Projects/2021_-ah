@@ -43,6 +43,7 @@ public class Pawn extends ChessPiece{
             case BLACK:
                 if(ynew > y)
                     return false;
+                break;
             case WHITE:
                 if(ynew < y)
                     return false;
@@ -77,6 +78,6 @@ public class Pawn extends ChessPiece{
     }
 
     public String getType(){
-        return "Pawn";
+        return "pawn";
     }
 }

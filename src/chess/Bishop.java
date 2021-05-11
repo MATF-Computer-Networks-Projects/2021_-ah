@@ -112,6 +112,6 @@ public class Bishop extends ChessPiece{
     }
 
     public String getType(){
-        return "Bishop";
+        return "bishop";
     }
 }
