@@ -72,10 +72,10 @@ public class Queen extends ChessPiece{
             ChessPiece c = board.getPiece(xnew, ynew);
 
             if (c == null || c.getTeam() != this.team) {
-                board.setPiece(this, xnew, ynew);
                 board.setPiece(null, x, y);
                 x = xnew;
                 y = ynew;
+                board.setPiece(this, xnew, ynew);
                 return true;
             }
         }
@@ -93,10 +93,10 @@ public class Queen extends ChessPiece{
             ChessPiece c = board.getPiece(xnew, ynew);
 
             if(c == null || c.getTeam() != this.team){
-                board.setPiece(this, xnew, ynew);
                 board.setPiece(null, x, y);
                 x = xnew;
                 y = ynew;
+                board.setPiece(this, xnew, ynew);
                 return true;
             }
         } else if (ynew != y && xnew == x){
@@ -108,10 +108,10 @@ public class Queen extends ChessPiece{
             ChessPiece c = board.getPiece(xnew, ynew);
 
             if(c == null || c.getTeam() != this.team){
-                board.setPiece(this, xnew, ynew);
                 board.setPiece(null, x, y);
                 x = xnew;
                 y = ynew;
+                board.setPiece(this, xnew, ynew);
                 return true;
             }
         }

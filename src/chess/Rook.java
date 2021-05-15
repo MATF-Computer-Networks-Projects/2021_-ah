@@ -44,11 +44,11 @@ public class Rook extends ChessPiece{
            ChessPiece c = board.getPiece(xnew, ynew);
 
            if(c == null || c.getTeam() != this.team){
-                board.setPiece(this, xnew, ynew);
-                board.setPiece(null, x, y);
-                x = xnew;
-                y = ynew;
-                return true;
+               board.setPiece(null, x, y);
+               x = xnew;
+               y = ynew;
+               board.setPiece(this, xnew, ynew);
+               return true;
            }
         //Pomeranje po y osi
         } else if (ynew != y){
@@ -61,10 +61,10 @@ public class Rook extends ChessPiece{
             ChessPiece c = board.getPiece(xnew, ynew);
 
             if(c == null || c.getTeam() != this.team){
-                board.setPiece(this, xnew, ynew);
                 board.setPiece(null, x, y);
                 x = xnew;
                 y = ynew;
+                board.setPiece(this, xnew, ynew);
                 return true;
             }
         }

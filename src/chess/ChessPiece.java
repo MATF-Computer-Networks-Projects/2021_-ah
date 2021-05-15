@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ChessPiece {
-    Team team;
-    int x;
-    int y;
+    protected Team team;
+    protected int x;
+    protected int y;
 
     public ChessPiece(int x, int y, Team team) {
         this.team = team;
@@ -33,5 +33,13 @@ public abstract class ChessPiece {
         else
             teamChar = "b";
         return this.getType()+teamChar;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
     }
 }

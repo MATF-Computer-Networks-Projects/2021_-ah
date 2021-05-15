@@ -6,7 +6,6 @@ import java.util.Scanner;
 public class TestMain {
     public static void main(String[] args) {
         ChessBoard board = new ChessBoard();
-        board.restartPositions();
         System.out.println(board);
 
 

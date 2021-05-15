@@ -60,10 +60,10 @@ public class Knight extends ChessPiece{
         }
 
         if(c == null || c.getTeam() != this.team){
-            board.setPiece(this, xnew, ynew);
             board.setPiece(null, x, y);
             x = xnew;
             y = ynew;
+            board.setPiece(this, xnew, ynew);
             return true;
         }
         return false;

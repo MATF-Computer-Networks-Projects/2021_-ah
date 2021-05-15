@@ -35,7 +35,6 @@ public class TestMainUI extends Application {
     public void start(Stage stage) throws FileNotFoundException {
 
         ChessBoard board = new ChessBoard();
-        board.restartPositions();
 
         GridPane pane = new GridPane();
 

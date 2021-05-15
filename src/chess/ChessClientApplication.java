@@ -11,13 +11,15 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import javax.swing.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class ChessClientApplication extends Application {
+public class ChessClientApplication extends Application implements PropertyChangeListener {
     private ChessClient client;
 
     private ChessClientMovesThread moveThread;
@@ -56,7 +58,7 @@ public class ChessClientApplication extends Application {
         pane.setGridLinesVisible(true);
 
         board = new ChessBoard();
-        board.restartPositions();
+        board.addPropertyChangeListener(this);
         loadImages();
 
         pane.setPadding(new Insets(50, 50, 50, 50));
@@ -150,8 +152,8 @@ public class ChessClientApplication extends Application {
                             //Prebacuje sliku figure na nove koordinate
 //                            moveThread.setMoveCoordinates(x, y, xnew, ynew);
 //                            moveThread.notify();
-                            moveInUI(x, y, xnew, ynew);
-
+//                            moveInUI(x, y, xnew, ynew);
+                            System.out.println(board);
                         }else{
                             System.out.println("illegal move!");
                         }
@@ -167,36 +169,36 @@ public class ChessClientApplication extends Application {
 
 
 
-    private synchronized void moveInUI(int x, int y, int xnew, int ynew){
-        for(Node node : pane.getChildren()) {
-            if(client.getTeam()==Team.WHITE) {
-                if (node instanceof Button && GridPane.getColumnIndex(node).equals(x) && GridPane.getRowIndex(node).equals(7 - y)) {
-
-                    ((Button) node).setGraphic(null);
-                } else if (node instanceof Button && GridPane.getColumnIndex(node).equals(xnew) && GridPane.getRowIndex(node).equals(7 - ynew)) {
-
-                    //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
-                    String s = board.getPiece(xnew, ynew).getImgFile() + ".png";
-                    Image image = images.get(s);
-                    ImageView imageView = new ImageView(image);
-                    ((Button) node).setGraphic(imageView);
-                }
-            }
-            else {
-                if (node instanceof Button && GridPane.getColumnIndex(node).equals(7-x) && GridPane.getRowIndex(node).equals(y)) {
-
-                    ((Button) node).setGraphic(null);
-                } else if (node instanceof Button && GridPane.getColumnIndex(node).equals(7-xnew) && GridPane.getRowIndex(node).equals(ynew)) {
-
-                    //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
-                    String s = board.getPiece(xnew, ynew).getImgFile() + ".png";
-                    Image image = images.get(s);
-                    ImageView imageView = new ImageView(image);
-                    ((Button) node).setGraphic(imageView);
-                }
-            }
-        }
-    }
+//    private void moveInUI(int x, int y, int xnew, int ynew){
+//        for(Node node : pane.getChildren()) {
+//            if(client.getTeam()==Team.WHITE) {
+//                if (node instanceof Button && GridPane.getColumnIndex(node).equals(x) && GridPane.getRowIndex(node).equals(7 - y)) {
+//
+//                    ((Button) node).setGraphic(null);
+//                } else if (node instanceof Button && GridPane.getColumnIndex(node).equals(xnew) && GridPane.getRowIndex(node).equals(7 - ynew)) {
+//
+//                    //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
+//                    String s = board.getPiece(xnew, ynew).getImgFile() + ".png";
+//                    Image image = images.get(s);
+//                    ImageView imageView = new ImageView(image);
+//                    ((Button) node).setGraphic(imageView);
+//                }
+//            }
+//            else {
+//                if (node instanceof Button && GridPane.getColumnIndex(node).equals(7-x) && GridPane.getRowIndex(node).equals(y)) {
+//
+//                    ((Button) node).setGraphic(null);
+//                } else if (node instanceof Button && GridPane.getColumnIndex(node).equals(7-xnew) && GridPane.getRowIndex(node).equals(ynew)) {
+//
+//                    //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
+//                    String s = board.getPiece(xnew, ynew).getImgFile() + ".png";
+//                    Image image = images.get(s);
+//                    ImageView imageView = new ImageView(image);
+//                    ((Button) node).setGraphic(imageView);
+//                }
+//            }
+//        }
+//    }
 
     private void loadImages() {
 
@@ -233,7 +235,59 @@ public class ChessClientApplication extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
+
+
+    //Proverava promene na backend sahovskoj tabli i replicira promene na GUI tabli
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
+        //Ako je nova vrednost null, to je prethodno polje u potezu
+        if(evt.getNewValue() == null) {
+            for(Node node : pane.getChildren()) {
+
+                //Koordinate za prikaz table belom timu
+                if(client.getTeam()==Team.WHITE
+                    && node instanceof Button
+                    && GridPane.getColumnIndex(node).equals(((ChessPiece) evt.getOldValue()).getX())
+                    && GridPane.getRowIndex(node).equals(7 - ((ChessPiece) evt.getOldValue()).getY())) {
+                        ((Button) node).setGraphic(null);
+
+                //Koordinate za prikaz table crnom timu
+                } else if (client.getTeam()==Team.BLACK
+                    && node instanceof Button
+                    && GridPane.getColumnIndex(node).equals(7 - ((ChessPiece) evt.getOldValue()).getX())
+                    && GridPane.getRowIndex(node).equals(((ChessPiece) evt.getOldValue()).getY())){
+                        ((Button) node).setGraphic(null);
+                }
+            }
+
+        //Sledece polje u potezu
+        } else {
+            for(Node node : pane.getChildren()) {
+
+                //Koordinate za prikaz table belom timu
+                if(client.getTeam()==Team.WHITE
+                        && node instanceof Button
+                        && GridPane.getColumnIndex(node).equals(((ChessPiece) evt.getNewValue()).getX())
+                        && GridPane.getRowIndex(node).equals(7 - ((ChessPiece) evt.getNewValue()).getY())) {
+                            String s = ((ChessPiece) evt.getNewValue()).getImgFile() + ".png";
+                            Image image = images.get(s);
+                            ImageView imageView = new ImageView(image);
+                            ((Button) node).setGraphic(imageView);
+
+                //Koordinate za prikaz table crnom timu
+                } else if (client.getTeam()==Team.BLACK
+                        && node instanceof Button
+                        && GridPane.getColumnIndex(node).equals(7 - ((ChessPiece) evt.getNewValue()).getX())
+                        && GridPane.getRowIndex(node).equals(((ChessPiece) evt.getNewValue()).getY())){
+                            String s = ((ChessPiece) evt.getNewValue()).getImgFile() + ".png";
+                            Image image = images.get(s);
+                            ImageView imageView = new ImageView(image);
+                            ((Button) node).setGraphic(imageView);
+                }
+            }
+        }
+    }
+
 }

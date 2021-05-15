@@ -55,20 +55,20 @@ public class Pawn extends ChessPiece{
             //Pion moze da se pomeri dijagonalno samo ako se na tom polju nalazi figura iz suprotnog tima
             case 1:
                 if(c != null && c.getTeam() != this.team){
-                    board.setPiece(this, xnew, ynew);
                     board.setPiece(null, x, y);
                     x = xnew;
                     y = ynew;
+                    board.setPiece(this, xnew, ynew);
                     return true;
                 }
                 return false;
             //Pomera se napred
             case 0:
                 if(c == null){
-                    board.setPiece(this, xnew, ynew);
                     board.setPiece(null, x, y);
                     x = xnew;
                     y = ynew;
+                    board.setPiece(this, xnew, ynew);
                     return true;
                 }
                 return false;

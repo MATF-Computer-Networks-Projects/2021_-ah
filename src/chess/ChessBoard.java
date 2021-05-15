@@ -1,19 +1,33 @@
 package chess;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ChessBoard {
-    private ChessPiece[][] pieces = new ChessPiece[8][8];
+    private ChessPiece[][] pieces;
 
+    private PropertyChangeSupport support;
+
+    public ChessBoard() {
+        pieces = new ChessPiece[8][8];
+        support = new PropertyChangeSupport(this);
+        restartPositions();
+    }
 
     public ChessPiece getPiece(int x, int y){
         return pieces[x][y];
     }
 
     public void setPiece(ChessPiece piece, int x, int y){
+        support.firePropertyChange("piece", pieces[x][y], piece);
         pieces[x][y] = piece;
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.addPropertyChangeListener(pcl);
     }
 
 
