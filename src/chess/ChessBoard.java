@@ -7,6 +7,7 @@ import java.util.List;
 public class ChessBoard {
     private ChessPiece[][] pieces = new ChessPiece[8][8];
 
+
     public ChessPiece getPiece(int x, int y){
         return pieces[x][y];
     }

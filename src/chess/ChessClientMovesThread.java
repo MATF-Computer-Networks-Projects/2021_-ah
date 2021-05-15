@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class ChessClientMovesThread extends Thread{
-    ChessClient client;
     private BufferedInputStream opponentMoveReader;
     private BufferedOutputStream moveSender;
+    int x;
+    int y;
+    int xnew;
+    int ynew;
 
-    public ChessClientMovesThread(ChessClient client, Socket socket) {
-        this.client = client;
+    public ChessClientMovesThread(Socket socket) {
         try {
             this.opponentMoveReader = new BufferedInputStream(socket.getInputStream());
         } catch (IOException e) {
@@ -27,5 +29,12 @@ public class ChessClientMovesThread extends Thread{
     @Override
     public void run() {
 
+    }
+
+    public void setMoveCoordinates(int x, int y, int xnew, int ynew){
+        this.x = x;
+        this.y = y;
+        this.xnew = xnew;
+        this.ynew = ynew;
     }
 }

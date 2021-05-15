@@ -20,9 +20,9 @@ import java.util.Scanner;
 public class ChessClientApplication extends Application {
     private ChessClient client;
 
+    private ChessClientMovesThread moveThread;
 
     private boolean buttonSelected = false;
-    private boolean moveSelected = false;
 
     Map<String, Image> images = new HashMap<>();
 
@@ -46,25 +46,28 @@ public class ChessClientApplication extends Application {
 
         client = new ChessClient("localhost", 12345);
 
-        Socket socket = new Socket(client.getHostname(), client.getPort());
+//        Socket socket = new Socket(client.getHostname(), client.getPort());
+//
+//        getTeam(socket);
+        client.setTeam(Team.WHITE);
 
-        getTeam(socket);
         pane = new GridPane();
 
         pane.setGridLinesVisible(true);
 
-        this.board = new ChessBoard();
-        this.board.restartPositions();
+        board = new ChessBoard();
+        board.restartPositions();
         loadImages();
 
         pane.setPadding(new Insets(50, 50, 50, 50));
         pane.setVgap(2);
         pane.setHgap(2);
 
-        if(client.getTeam()==Team.WHITE)
-            initializeP1();
-        else
-            initializeP2();
+        initialize();
+
+//        moveThread = new ChessClientMovesThread(socket);
+//
+//        moveThread.start();
 
         Scene scene = new Scene(pane);
         stage.setScene(scene);
@@ -74,7 +77,7 @@ public class ChessClientApplication extends Application {
 
 
 
-    private void initializeP1(){
+    private void initialize(){
         boolean grey = true;
 
         for(int i = 0; i < 8; i++) {
@@ -87,7 +90,7 @@ public class ChessClientApplication extends Application {
 
                 if(i<2 || i>5){
                     //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
-                    String s = this.board.getPiece(j, i).getImgFile() + ".png";
+                    String s = board.getPiece(j, i).getImgFile() + ".png";
                     Image image = images.get(s);
                     ImageView imageView = new ImageView(image);
                     button.setGraphic(imageView);
@@ -101,72 +104,10 @@ public class ChessClientApplication extends Application {
                 else
                     button.setStyle("-fx-background-color: White");
 
-                this.pane.add(button, j, 7-i);
-
-
-
-                button.setOnMouseClicked( e -> {
-
-                    //Biranje prvog polja u potezu
-                    if(!buttonSelected && !moveSelected){
-
-                        x = GridPane.getColumnIndex(button);
-                        y = 7-GridPane.getRowIndex(button);
-                        buttonSelected = !buttonSelected;
-
-                    }
-                    //Biranje drugog polja i pomeranje ako je dozvoljeno
-                    else if(buttonSelected && !moveSelected){
-                        xnew = GridPane.getColumnIndex(button);
-                        ynew = 7-GridPane.getRowIndex(button);
-
-
-                        if(this.board.getPiece(x, y).move(this.board, xnew, ynew)){
-
-                            //Prebacuje sliku figure na nove koordinate
-                            localMove(x, y, xnew, ynew);
-
-                        }else{
-                            System.out.println("illegal move!");
-                        }
-                        moveSelected = !moveSelected;
-                    }
-                });
-                grey = !grey;
-            }
-            grey = !grey;
-        }
-    }
-
-
-    private void initializeP2(){
-        boolean grey = true;
-
-        for(int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-
-                Button button = new Button("");
-                button.setPrefSize(60, 60);
-                button.setPadding(new Insets(0, 0, 0, 0));
-
-
-                if(i<2 || i>5){
-                    //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
-                    String s = this.board.getPiece(j, i).getImgFile() + ".png";
-                    Image image = images.get(s);
-                    ImageView imageView = new ImageView(image);
-                    button.setGraphic(imageView);
-                }
-
-
-
-
-                if (grey)
-                    button.setStyle("-fx-background-color: Grey");
+                if(client.getTeam()==Team.WHITE)
+                    pane.add(button, j, 7-i);
                 else
-                    button.setStyle("-fx-background-color: White");
-
-                this.pane.add(button, 7-j, i);
+                    pane.add(button, 7-j, i);
 
 
 
@@ -175,21 +116,41 @@ public class ChessClientApplication extends Application {
                     //Biranje prvog polja u potezu
                     if(!buttonSelected){
 
-                        x = 7-GridPane.getColumnIndex(button);
-                        y = GridPane.getRowIndex(button);
-                        buttonSelected = !buttonSelected;
+                        if(client.getTeam()==Team.WHITE){
+                            x = GridPane.getColumnIndex(button);
+                            y = 7-GridPane.getRowIndex(button);
+                        }
+                        else{
+                            x = 7-GridPane.getColumnIndex(button);
+                            y = GridPane.getRowIndex(button);
+                        }
 
+                        if(board.getPiece(x, y)==null)
+                            System.out.println("No piece");
+                        else if(board.getPiece(x, y).getTeam()!=client.getTeam())
+                            System.out.println("Wrong team");
+                        else {
+                            System.out.println(board.getPiece(x, y).getType());
+                            buttonSelected = !buttonSelected;
+                        }
                     }
                     //Biranje drugog polja i pomeranje ako je dozvoljeno
-                    else{
-                        xnew = 7-GridPane.getColumnIndex(button);
-                        ynew = GridPane.getRowIndex(button);
+                    else {
+                        if(client.getTeam()==Team.WHITE){
+                            xnew = GridPane.getColumnIndex(button);
+                            ynew = 7-GridPane.getRowIndex(button);
+                        }
+                        else{
+                            xnew = 7-GridPane.getColumnIndex(button);
+                            ynew = GridPane.getRowIndex(button);
+                        }
 
-
-                        if(this.board.getPiece(x, y).move(this.board, xnew, ynew)){
+                        if(board.getPiece(x, y).move(board, xnew, ynew)){
 
                             //Prebacuje sliku figure na nove koordinate
-                            localMove(x, y, xnew, ynew);
+//                            moveThread.setMoveCoordinates(x, y, xnew, ynew);
+//                            moveThread.notify();
+                            moveInUI(x, y, xnew, ynew);
 
                         }else{
                             System.out.println("illegal move!");
@@ -206,8 +167,8 @@ public class ChessClientApplication extends Application {
 
 
 
-    private void localMove(int x, int y, int xnew, int ynew){
-        for(Node node : this.pane.getChildren()) {
+    private synchronized void moveInUI(int x, int y, int xnew, int ynew){
+        for(Node node : pane.getChildren()) {
             if(client.getTeam()==Team.WHITE) {
                 if (node instanceof Button && GridPane.getColumnIndex(node).equals(x) && GridPane.getRowIndex(node).equals(7 - y)) {
 
@@ -215,7 +176,7 @@ public class ChessClientApplication extends Application {
                 } else if (node instanceof Button && GridPane.getColumnIndex(node).equals(xnew) && GridPane.getRowIndex(node).equals(7 - ynew)) {
 
                     //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
-                    String s = this.board.getPiece(xnew, ynew).getImgFile() + ".png";
+                    String s = board.getPiece(xnew, ynew).getImgFile() + ".png";
                     Image image = images.get(s);
                     ImageView imageView = new ImageView(image);
                     ((Button) node).setGraphic(imageView);
@@ -228,7 +189,7 @@ public class ChessClientApplication extends Application {
                 } else if (node instanceof Button && GridPane.getColumnIndex(node).equals(7-xnew) && GridPane.getRowIndex(node).equals(ynew)) {
 
                     //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
-                    String s = this.board.getPiece(xnew, ynew).getImgFile() + ".png";
+                    String s = board.getPiece(xnew, ynew).getImgFile() + ".png";
                     Image image = images.get(s);
                     ImageView imageView = new ImageView(image);
                     ((Button) node).setGraphic(imageView);
@@ -259,13 +220,7 @@ public class ChessClientApplication extends Application {
         this.buttonSelected = buttonSelected;
     }
 
-    public boolean isMoveSelected() {
-        return moveSelected;
-    }
 
-    public void setMoveSelected(boolean moveSelected) {
-        this.moveSelected = moveSelected;
-    }
 
     private void getTeam(Socket socket){
         try {
