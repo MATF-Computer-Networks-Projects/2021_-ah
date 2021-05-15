@@ -65,10 +65,14 @@ public class TestMainUI extends Application {
                     Button button = new Button("");
                     button.setPrefSize(60, 60);
                     button.setPadding(new Insets(0, 0, 0, 0));
+
+
                     if (grey)
                         button.setStyle("-fx-background-color: Grey");
+                    else
+                        button.setStyle("-fx-background-color: White");
 
-                    pane.add(button, j, i);
+                    pane.add(button, j, 7-i);
 
 
 
@@ -77,7 +81,7 @@ public class TestMainUI extends Application {
                         //Biranje prvog polja u potezu
                         if(!buttonSelected){
                             x = GridPane.getColumnIndex(button);
-                            y = GridPane.getRowIndex(button);
+                            y = 7-GridPane.getRowIndex(button);
                             if(board.getPiece(x, y)==null){
                                 System.out.println("no piece on coords: "+x+" "+y);
                             }else{
@@ -88,7 +92,7 @@ public class TestMainUI extends Application {
                         //Biranje drugog polja i pomeranje ako je dozvoljeno
                         else{
                             xnew = GridPane.getColumnIndex(button);
-                            ynew = GridPane.getRowIndex(button);
+                            ynew = 7-GridPane.getRowIndex(button);
 
                             //Ako je potez legalan
                             if(board.getPiece(x, y).move(board, xnew, ynew)){
@@ -118,10 +122,14 @@ public class TestMainUI extends Application {
                     Button button = new Button("", new ImageView(image));
                     button.setPadding(new Insets(0, 0, 0, 0));
                     button.setPrefSize(60, 60);
+
+
                     if (grey)
                         button.setStyle("-fx-background-color: Grey");
+                    else
+                        button.setStyle("-fx-background-color: White");
 
-                    pane.add(button, j, i);
+                    pane.add(button, j, 7-i);
 
 
 
@@ -130,7 +138,7 @@ public class TestMainUI extends Application {
                         //Biranje prvog polja u potezu
                         if(!buttonSelected){
                             x = GridPane.getColumnIndex(button);
-                            y = GridPane.getRowIndex(button);
+                            y = 7-GridPane.getRowIndex(button);
                             if(board.getPiece(x, y)==null){
                                 System.out.println("no piece on coords: "+x+" "+y);
                             }else{
@@ -142,7 +150,7 @@ public class TestMainUI extends Application {
                         //Biranje drugog polja i pomeranje ako je dozvoljeno
                         else{
                             xnew = GridPane.getColumnIndex(button);
-                            ynew = GridPane.getRowIndex(button);
+                            ynew = 7-GridPane.getRowIndex(button);
 
                             //Ako je potez legalan
                             if(board.getPiece(x, y).move(board, xnew, ynew)){
@@ -178,7 +186,7 @@ public class TestMainUI extends Application {
 
 
         for (Node node : pane.getChildren()) {
-            if(node instanceof Button && GridPane.getColumnIndex(node).equals(x) && GridPane.getRowIndex(node).equals(y)){
+            if(node instanceof Button && GridPane.getColumnIndex(node).equals(x) && GridPane.getRowIndex(node).equals(7-y)){
                 return (Button)node;
             }
         }

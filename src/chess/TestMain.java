@@ -9,6 +9,8 @@ public class TestMain {
         board.restartPositions();
         System.out.println(board);
 
+
+
         while(true){
             int x;
             int y;
