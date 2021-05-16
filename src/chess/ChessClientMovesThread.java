@@ -1,26 +1,24 @@
 package chess;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 public class ChessClientMovesThread extends Thread{
-    private BufferedInputStream opponentMoveReader;
-    private BufferedOutputStream moveSender;
-    int x;
-    int y;
-    int xnew;
-    int ynew;
+    private DataInputStream opponentMoveReader;
+    private DataOutputStream moveSender;
+    ChessClientApplication parentApp;
 
-    public ChessClientMovesThread(Socket socket) {
+    public ChessClientMovesThread(Socket socket, ChessClientApplication parentApp) {
+
+        this.parentApp = parentApp;
+
         try {
-            this.opponentMoveReader = new BufferedInputStream(socket.getInputStream());
+            this.opponentMoveReader = new DataInputStream(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            this.moveSender = new BufferedOutputStream(socket.getOutputStream());
+            this.moveSender = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -28,13 +26,65 @@ public class ChessClientMovesThread extends Thread{
 
     @Override
     public void run() {
+        if(parentApp.getClient().getTeam() == Team.WHITE) {
+            parentApp.setYourTurn(true);
+            try {
+                synchronized (parentApp.getMove()) {
+                    parentApp.getMove().wait();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-    }
+            int[] move = parentApp.getMove();
+            StringBuilder s = new StringBuilder("sending move: ");
 
-    public void setMoveCoordinates(int x, int y, int xnew, int ynew){
-        this.x = x;
-        this.y = y;
-        this.xnew = xnew;
-        this.ynew = ynew;
+            for(int a : move) {
+                try {
+                    moveSender.writeInt(a);
+                    s.append(a+" ");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println(s);
+            parentApp.setYourTurn(false);
+        }
+        while(true){
+            int oppX;
+            int oppY;
+            int oppXNEW;
+            int oppYNEW;
+            try {
+                System.out.println("got here");
+                oppX = opponentMoveReader.readInt();
+                oppY = opponentMoveReader.readInt();
+                oppXNEW = opponentMoveReader.readInt();
+                oppYNEW = opponentMoveReader.readInt();
+                System.out.println("move recieved "+oppX+" "+oppY+" "+oppXNEW+" "+oppYNEW);
+                parentApp.opponentMove(oppX, oppY, oppXNEW, oppYNEW);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            parentApp.setYourTurn(true);
+            try {
+                synchronized (parentApp.getMove()) {
+                    parentApp.getMove().wait();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            int[] move = parentApp.getMove();
+
+            for(int a : move) {
+                try {
+                    moveSender.writeInt(a);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            parentApp.setYourTurn(false);
+        }
     }
 }

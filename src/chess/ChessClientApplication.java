@@ -25,11 +25,13 @@ public class ChessClientApplication extends Application implements PropertyChang
     private ChessClientMovesThread moveThread;
 
     private boolean buttonSelected = false;
+    private boolean yourTurn = false;
 
     Map<String, Image> images = new HashMap<>();
 
     ChessBoard board;
 
+    int move[] = new int[4];
     int x;
     int y;
     int xnew;
@@ -46,12 +48,13 @@ public class ChessClientApplication extends Application implements PropertyChang
     @Override
     public void start(Stage stage) throws Exception {
 
-        client = new ChessClient("localhost", 12345);
+        client = new ChessClient("localhost", ChessMoveServer.MOVE_SERVER_PORT);
 
-//        Socket socket = new Socket(client.getHostname(), client.getPort());
-//
-//        getTeam(socket);
-        client.setTeam(Team.WHITE);
+        Socket socket = new Socket(client.getHostname(), client.getPort());
+
+        getTeam(socket);
+        System.out.println(client.getTeam());
+//        client.setTeam(Team.WHITE);
 
         pane = new GridPane();
 
@@ -67,14 +70,14 @@ public class ChessClientApplication extends Application implements PropertyChang
 
         initialize();
 
-//        moveThread = new ChessClientMovesThread(socket);
-//
-//        moveThread.start();
+        moveThread = new ChessClientMovesThread(socket, this);
 
         Scene scene = new Scene(pane);
         stage.setScene(scene);
 
         stage.show();
+
+        moveThread.start();
     }
 
 
@@ -116,44 +119,54 @@ public class ChessClientApplication extends Application implements PropertyChang
                 button.setOnMouseClicked( e -> {
 
                     //Biranje prvog polja u potezu
-                    if(!buttonSelected){
+                    if(!buttonSelected && yourTurn){
 
                         if(client.getTeam()==Team.WHITE){
-                            x = GridPane.getColumnIndex(button);
-                            y = 7-GridPane.getRowIndex(button);
+                            move[0] = GridPane.getColumnIndex(button);
+                            move[1] = 7 - GridPane.getRowIndex(button);
+//                            x = GridPane.getColumnIndex(button);
+//                            y = 7-GridPane.getRowIndex(button);
                         }
                         else{
-                            x = 7-GridPane.getColumnIndex(button);
-                            y = GridPane.getRowIndex(button);
+                            move[0] = 7 - GridPane.getColumnIndex(button);
+                            move[1] = GridPane.getRowIndex(button);
+//                            x = 7-GridPane.getColumnIndex(button);
+//                            y = GridPane.getRowIndex(button);
                         }
 
-                        if(board.getPiece(x, y)==null)
+                        if(board.getPiece(move[0], move[1])==null)
                             System.out.println("No piece");
-                        else if(board.getPiece(x, y).getTeam()!=client.getTeam())
+                        else if(board.getPiece(move[0], move[1]).getTeam()!=client.getTeam())
                             System.out.println("Wrong team");
                         else {
-                            System.out.println(board.getPiece(x, y).getType());
+                            System.out.println(board.getPiece(move[0], move[1]).getType());
                             buttonSelected = !buttonSelected;
                         }
                     }
                     //Biranje drugog polja i pomeranje ako je dozvoljeno
-                    else {
+                    else if(buttonSelected && yourTurn){
                         if(client.getTeam()==Team.WHITE){
-                            xnew = GridPane.getColumnIndex(button);
-                            ynew = 7-GridPane.getRowIndex(button);
+                            move[2] = GridPane.getColumnIndex(button);
+                            move[3] = 7-GridPane.getRowIndex(button);
+//                            xnew = GridPane.getColumnIndex(button);
+//                            ynew = 7-GridPane.getRowIndex(button);
                         }
                         else{
-                            xnew = 7-GridPane.getColumnIndex(button);
-                            ynew = GridPane.getRowIndex(button);
+                            move[2] = 7-GridPane.getColumnIndex(button);
+                            move[3] = GridPane.getRowIndex(button);
+//                            xnew = 7-GridPane.getColumnIndex(button);
+//                            ynew = GridPane.getRowIndex(button);
                         }
 
-                        if(board.getPiece(x, y).move(board, xnew, ynew)){
+                        if(board.getPiece(move[0], move[1]).move(board, move[2], move[3])){
 
                             //Prebacuje sliku figure na nove koordinate
 //                            moveThread.setMoveCoordinates(x, y, xnew, ynew);
 //                            moveThread.notify();
 //                            moveInUI(x, y, xnew, ynew);
-                            System.out.println(board);
+                            synchronized (move) {
+                                move.notify();
+                            }
                         }else{
                             System.out.println("illegal move!");
                         }
@@ -206,7 +219,6 @@ public class ChessClientApplication extends Application implements PropertyChang
         String[] imageKeys = imageDirectory.list();
         for(String image : imageKeys) {
             try {
-                System.out.println(image);
                 images.put(image, new Image(new FileInputStream("M:\\Projects\\2021_Sah\\icons\\"+image)));
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -226,8 +238,7 @@ public class ChessClientApplication extends Application implements PropertyChang
 
     private void getTeam(Socket socket){
         try {
-            Scanner sc = new Scanner(socket.getInputStream());
-            int team = sc.nextInt();
+            int team = socket.getInputStream().read();
             if(team == 1)
                 this.client.setTeam(Team.WHITE);
             else
@@ -290,4 +301,23 @@ public class ChessClientApplication extends Application implements PropertyChang
         }
     }
 
+    public ChessClient getClient() {
+        return client;
+    }
+
+    public void setYourTurn(boolean yourTurn) {
+        this.yourTurn = yourTurn;
+    }
+
+    public int[] getMove() {
+        return move;
+    }
+
+    //    public int[] getMove(){
+//        return new int[]{x, y, xnew, ynew};
+//    }
+
+    public void opponentMove(int x, int y, int xnew, int ynew){
+        board.getPiece(x, y).move(board, xnew, ynew);
+    }
 }
