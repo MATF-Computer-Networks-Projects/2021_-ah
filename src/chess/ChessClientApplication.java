@@ -1,6 +1,7 @@
 package chess;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -31,7 +32,7 @@ public class ChessClientApplication extends Application implements PropertyChang
 
     ChessBoard board;
 
-    int move[] = new int[4];
+    int[] move = new int[4];
     int x;
     int y;
     int xnew;
@@ -318,6 +319,14 @@ public class ChessClientApplication extends Application implements PropertyChang
 //    }
 
     public void opponentMove(int x, int y, int xnew, int ynew){
-        board.getPiece(x, y).move(board, xnew, ynew);
+
+        //Metoda se pokrece samo iz moveThread niti, pa je potrebno dodati runLater jer menja GUI
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                board.getPiece(x, y).move(board, xnew, ynew);
+            }
+        });
+
     }
 }

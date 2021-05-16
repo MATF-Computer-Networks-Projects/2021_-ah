@@ -50,12 +50,11 @@ public class ChessMoveServer {
                 ynew = inStream.readInt();
                 System.err.println("move recieved "+x+" "+y+" "+xnew+" "+ynew+" from player "+(1-i));
 
-                DataOutputStream outStream = new DataOutputStream(players[i].getOutputStream());
+                DataOutputStream outStream = new DataOutputStream(players[1-i].getOutputStream());
                 outStream.writeInt(x);
                 outStream.writeInt(y);
                 outStream.writeInt(xnew);
                 outStream.writeInt(ynew);
-                System.out.println("got here");
                 i = 1-i;
             }
 
