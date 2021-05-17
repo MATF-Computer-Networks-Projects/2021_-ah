@@ -14,9 +14,9 @@ import java.util.Set;
 public class ChessMoveServer {
     static final int MOVE_SERVER_PORT = 12345;
 
-    private int port;
+    private final int port;
 
-    private Socket[] players = new Socket[2];
+    private PlayerOnServer[] players = new PlayerOnServer[2];
 
     public ChessMoveServer(int port) {
         this.port = port;
@@ -29,12 +29,17 @@ public class ChessMoveServer {
 
     private void execute() {
         try(ServerSocket serverSocket = new ServerSocket(port)){
-            for(int i = 0; i<1; i++){
+            for(int i = 0; i<2; i++){
                 Socket socket = serverSocket.accept();
-                players[i] = socket;
+                players[i] = new PlayerOnServer(socket);
 
                 System.err.println("Connected player "+(i+1));
-                socket.getOutputStream().write(i+1);
+                players[i].getOstream().writeInt(i+1);
+                if(i==1){
+                    for(int j=0; j<2; j++)
+                        players[j].getOstream().writeBoolean(true);
+                }
+
             }
 
             int i = 0;
@@ -43,14 +48,14 @@ public class ChessMoveServer {
             int xnew;
             int ynew;
             while(true){
-                DataInputStream inStream = new DataInputStream(players[i].getInputStream());
+                DataInputStream inStream = players[i].getIstream();
                 x = inStream.readInt();
                 y = inStream.readInt();
                 xnew = inStream.readInt();
                 ynew = inStream.readInt();
-                System.err.println("move recieved "+x+" "+y+" "+xnew+" "+ynew+" from player "+(1-i));
+                System.err.println("move recieved "+x+" "+y+" "+xnew+" "+ynew+" from player "+(1+i));
 
-                DataOutputStream outStream = new DataOutputStream(players[1-i].getOutputStream());
+                DataOutputStream outStream = players[1-i].getOstream();
                 outStream.writeInt(x);
                 outStream.writeInt(y);
                 outStream.writeInt(xnew);

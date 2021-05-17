@@ -1,6 +1,6 @@
 package chess;
 
-public class TestMainUIFix {
+public class AppLauncher {
     public static void main(String[] args) {
         ChessClientApplication.main(args);
     }

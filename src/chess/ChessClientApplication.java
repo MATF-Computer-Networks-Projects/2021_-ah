@@ -6,9 +6,13 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import javax.swing.*;
@@ -27,20 +31,28 @@ public class ChessClientApplication extends Application implements PropertyChang
 
     private boolean buttonSelected = false;
     private boolean yourTurn = false;
+    private boolean gameOver = false;
 
     Map<String, Image> images = new HashMap<>();
 
     ChessBoard board;
 
     int[] move = new int[4];
-    int x;
-    int y;
-    int xnew;
-    int ynew;
+
 
     GridPane pane;
 
     public static void main(String[] args) {
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    (new ChessClientApplication()).start(new Stage());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
         launch(args);
     }
 
@@ -56,6 +68,18 @@ public class ChessClientApplication extends Application implements PropertyChang
         getTeam(socket);
         System.out.println(client.getTeam());
 //        client.setTeam(Team.WHITE);
+
+
+
+        TextArea chat = new TextArea();
+        chat.setDisable(true);
+        chat.setPrefSize(200, 480);
+//        chat.setPadding(new Insets(0, 0, 20, 0));
+        TextField message = new TextField();
+        message.setPrefSize(200, 20);
+//        message.setPadding(new Insets(20, 0, 0, 0));
+        VBox chatBox = new VBox(chat, message);
+        chatBox.setPadding(new Insets(50, 20, 50, 0));
 
         pane = new GridPane();
 
@@ -73,7 +97,11 @@ public class ChessClientApplication extends Application implements PropertyChang
 
         moveThread = new ChessClientMovesThread(socket, this);
 
-        Scene scene = new Scene(pane);
+        chatBox.setPrefSize(200, 480);
+
+        HBox hbox = new HBox(pane, chatBox);
+
+        Scene scene = new Scene(hbox);
         stage.setScene(scene);
 
         stage.show();
@@ -239,7 +267,7 @@ public class ChessClientApplication extends Application implements PropertyChang
 
     private void getTeam(Socket socket){
         try {
-            int team = socket.getInputStream().read();
+            int team = new DataInputStream(socket.getInputStream()).readInt();
             if(team == 1)
                 this.client.setTeam(Team.WHITE);
             else
@@ -276,6 +304,13 @@ public class ChessClientApplication extends Application implements PropertyChang
 
         //Sledece polje u potezu
         } else {
+            if(evt.getOldValue() != null && ((ChessPiece) evt.getOldValue()).getType().equals("king")){
+                gameOver = true;
+                if(((ChessPiece) evt.getOldValue()).getTeam().equals(Team.BLACK))
+                    System.out.println("White wins");
+                else
+                    System.out.println("Black wins");
+            }
             for(Node node : pane.getChildren()) {
 
                 //Koordinate za prikaz table belom timu
@@ -299,6 +334,7 @@ public class ChessClientApplication extends Application implements PropertyChang
                             ((Button) node).setGraphic(imageView);
                 }
             }
+
         }
     }
 
@@ -314,12 +350,19 @@ public class ChessClientApplication extends Application implements PropertyChang
         return move;
     }
 
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
     //    public int[] getMove(){
 //        return new int[]{x, y, xnew, ynew};
 //    }
 
     public void opponentMove(int x, int y, int xnew, int ynew){
 
+
+        if(board.getPiece(xnew, ynew) != null && board.getPiece(xnew, ynew).getType().equals("king"))
+            gameOver = true;
         //Metoda se pokrece samo iz moveThread niti, pa je potrebno dodati runLater jer menja GUI
         Platform.runLater(new Runnable() {
             @Override
