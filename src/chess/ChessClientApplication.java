@@ -2,17 +2,26 @@ package chess;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import javax.swing.*;
@@ -20,9 +29,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class ChessClientApplication extends Application implements PropertyChangeListener {
     private ChessClient client;
@@ -33,26 +40,20 @@ public class ChessClientApplication extends Application implements PropertyChang
     private boolean yourTurn = false;
     private boolean gameOver = false;
 
+
     Map<String, Image> images = new HashMap<>();
 
-    ChessBoard board;
+    private ChessBoard board;
 
     int[] move = new int[4];
 
 
-    GridPane pane;
+    private GridPane pane;
+
+    private Label turnLabel = new Label();
+
 
     public static void main(String[] args) {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    (new ChessClientApplication()).start(new Stage());
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
         launch(args);
     }
 
@@ -61,25 +62,20 @@ public class ChessClientApplication extends Application implements PropertyChang
     @Override
     public void start(Stage stage) throws Exception {
 
-        client = new ChessClient("localhost", ChessMoveServer.MOVE_SERVER_PORT);
+        client = new ChessClient("localhost");
 
-        Socket socket = new Socket(client.getHostname(), client.getPort());
+        Socket chessSocket = new Socket(client.getHostname(), ChessMoveServer.MOVE_SERVER_PORT);
 
-        getTeam(socket);
-        System.out.println(client.getTeam());
-//        client.setTeam(Team.WHITE);
+        getTeam(chessSocket);
+
+        Socket chatSocket = new Socket(client.getHostname(), ChessChatServer.CHAT_SERVER_PORT);
 
 
+        TextFlow textflow = new TextFlow();
 
-        TextArea chat = new TextArea();
-        chat.setDisable(true);
-        chat.setPrefSize(200, 480);
-//        chat.setPadding(new Insets(0, 0, 20, 0));
+        ScrollPane sp = new ScrollPane();
+
         TextField message = new TextField();
-        message.setPrefSize(200, 20);
-//        message.setPadding(new Insets(20, 0, 0, 0));
-        VBox chatBox = new VBox(chat, message);
-        chatBox.setPadding(new Insets(50, 20, 50, 0));
 
         pane = new GridPane();
 
@@ -87,19 +83,28 @@ public class ChessClientApplication extends Application implements PropertyChang
 
         board = new ChessBoard();
         board.addPropertyChangeListener(this);
+
         loadImages();
 
-        pane.setPadding(new Insets(50, 50, 50, 50));
+//        pane.setPadding(new Insets(50, 50, 50, 50));
         pane.setVgap(2);
         pane.setHgap(2);
 
         initialize();
+        VBox chatBox = initializeChat(textflow, sp, message);
 
-        moveThread = new ChessClientMovesThread(socket, this);
+        moveThread = new ChessClientMovesThread(chessSocket, this);
+        ChessClientReadThread chatReadThread = new ChessClientReadThread(chatSocket, textflow, client.getTeam());
+        ChessClientWriteThread chatWriteThread = new ChessClientWriteThread(chatSocket, textflow, message, client.getTeam());
 
-        chatBox.setPrefSize(200, 480);
-
-        HBox hbox = new HBox(pane, chatBox);
+        VBox chessBox = new VBox();
+        chessBox.setPadding(new Insets(50, 50, 50, 50));
+        chessBox.setAlignment(Pos.CENTER);
+        turnLabel.setFont(new Font("Arial", 15));
+        turnLabel.setPadding(new Insets(0, 0, 15, 0));
+        chessBox.getChildren().add(turnLabel);
+        chessBox.getChildren().add(pane);
+        HBox hbox = new HBox(chessBox, chatBox);
 
         Scene scene = new Scene(hbox);
         stage.setScene(scene);
@@ -107,8 +112,26 @@ public class ChessClientApplication extends Application implements PropertyChang
         stage.show();
 
         moveThread.start();
+        chatReadThread.start();
+        chatWriteThread.start();
     }
 
+    private VBox initializeChat(TextFlow textflow, ScrollPane sp, TextField message) {
+        VBox chat = new VBox();
+        chat.getChildren().add(textflow);
+        sp.setFitToHeight(true);
+        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        sp.setPrefSize(200, 520);
+        sp.setStyle("-fx-background-color: black");
+        sp.setContent(chat);
+        message.setPrefSize(200, 20);
+        VBox chatBox = new VBox();
+        chatBox.getChildren().add(0, message);
+        chatBox.getChildren().add(0, sp);
+        chatBox.setPadding(new Insets(50, 20, 50, 0));
+        chatBox.setPrefSize(200, 480);
+        return chatBox;
+    }
 
 
     private void initialize(){
@@ -246,6 +269,7 @@ public class ChessClientApplication extends Application implements PropertyChang
 
         File imageDirectory = new File("M:\\Projects\\2021_Sah\\icons");
         String[] imageKeys = imageDirectory.list();
+        assert imageKeys != null;
         for(String image : imageKeys) {
             try {
                 images.put(image, new Image(new FileInputStream("M:\\Projects\\2021_Sah\\icons\\"+image)));
@@ -253,14 +277,6 @@ public class ChessClientApplication extends Application implements PropertyChang
                 e.printStackTrace();
             }
         }
-    }
-
-    public boolean isButtonSelected() {
-        return buttonSelected;
-    }
-
-    public void setButtonSelected(boolean buttonSelected) {
-        this.buttonSelected = buttonSelected;
     }
 
 
@@ -344,6 +360,12 @@ public class ChessClientApplication extends Application implements PropertyChang
 
     public void setYourTurn(boolean yourTurn) {
         this.yourTurn = yourTurn;
+        Platform.runLater(() -> {
+            if(yourTurn)
+                turnLabel.setText("YOUR TURN");
+            else
+                turnLabel.setText("OPPONENT'S TURN");
+        });
     }
 
     public int[] getMove() {
@@ -364,12 +386,15 @@ public class ChessClientApplication extends Application implements PropertyChang
         if(board.getPiece(xnew, ynew) != null && board.getPiece(xnew, ynew).getType().equals("king"))
             gameOver = true;
         //Metoda se pokrece samo iz moveThread niti, pa je potrebno dodati runLater jer menja GUI
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                board.getPiece(x, y).move(board, xnew, ynew);
-            }
-        });
+        Platform.runLater(() -> board.getPiece(x, y).move(board, xnew, ynew));
 
     }
+
+//    public void receiveMessage(Text message){
+//        Platform.runLater(new Runnable(){
+//            public void run() {
+//                textFlow.getChildren().add(new Text("Player 2: \n"+message+"\n"));
+//            }
+//        });
+//    }
 }

@@ -48,14 +48,15 @@ public class ChessClientMovesThread extends Thread{
                     for (int a : move) {
                         try {
                             moveSender.writeInt(a);
-                            s.append(a + " ");
+                            s.append(a);
+                            s.append(" ");
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                     System.out.println(s);
-                    parentApp.setYourTurn(false);
                 }
+                parentApp.setYourTurn(false);
                 while (true) {
                     int oppX;
                     int oppY;
@@ -74,10 +75,9 @@ public class ChessClientMovesThread extends Thread{
                     }
 
 
-                    if(parentApp.isGameOver())
+                    if(parentApp.isGameOver()) {
                         break;
-
-                    System.out.println(parentApp.isGameOver());
+                    }
 
                     parentApp.setYourTurn(true);
                     try {
@@ -94,13 +94,15 @@ public class ChessClientMovesThread extends Thread{
                     for (int a : move) {
                         try {
                             moveSender.writeInt(a);
-                            s.append(a + " ");
+                            s.append(a);
+                            s.append(" ");
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                     System.out.println(s);
                     parentApp.setYourTurn(false);
+
                     if(parentApp.isGameOver())
                         break;
                 }

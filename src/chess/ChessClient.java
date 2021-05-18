@@ -18,12 +18,10 @@ import java.util.Map;
 
 public class ChessClient {
     private String hostname;
-    private int port;
     private Team team;
 
-    public ChessClient(String hostname, int port) {
+    public ChessClient(String hostname) {
         this.hostname = hostname;
-        this.port = port;
     }
 
     public Team getTeam() {
@@ -38,7 +36,4 @@ public class ChessClient {
         return hostname;
     }
 
-    public int getPort() {
-        return port;
-    }
 }
