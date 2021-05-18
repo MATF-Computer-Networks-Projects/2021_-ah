@@ -9,8 +9,8 @@ import java.net.Socket;
 public class ChatUserThread extends Thread{
     private Socket socket;
     private ChessChatServer chatServer;
-    private PrintWriter messageSender;
     private int index;
+    private PrintWriter messageSender;
 
     ChatUserThread(Socket socket, ChessChatServer server, int index) {
         this.socket = socket;
@@ -25,18 +25,18 @@ public class ChatUserThread extends Thread{
 
     public void run() {
         try {
+
             BufferedReader userMessageReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 
-
             String userMessage;
+
+            //Prima poruke od korisnika dokle god ne dobije poruku "cao"
             do {
                 userMessage = userMessageReader.readLine();
                 if (userMessage == null)
                     break;
                 this.chatServer.broadcast(userMessage, index);
             } while (!userMessage.equals("cao"));
-
-
 
             this.socket.close();
 

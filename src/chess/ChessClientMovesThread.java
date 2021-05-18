@@ -28,12 +28,15 @@ public class ChessClientMovesThread extends Thread{
     public void run() {
 
         try {
+            //Ako je dobio poruku od servera da je partija pocela
             if(opponentMoveReader.readBoolean()) {
 
+                //Beli tim igra prvi
                 if (parentApp.getClient().getTeam() == Team.WHITE) {
 
                     parentApp.setYourTurn(true);
 
+                    //Ceka potez iz glavne aplikacije
                     try {
                         synchronized (parentApp.getMove()) {
                             parentApp.getMove().wait();
@@ -45,6 +48,7 @@ public class ChessClientMovesThread extends Thread{
                     int[] move = parentApp.getMove();
                     StringBuilder s = new StringBuilder("sending move: ");
 
+                    //Salje potez na server
                     for (int a : move) {
                         try {
                             moveSender.writeInt(a);
@@ -56,12 +60,15 @@ public class ChessClientMovesThread extends Thread{
                     }
                     System.out.println(s);
                 }
-                parentApp.setYourTurn(false);
+
                 while (true) {
+                    parentApp.setYourTurn(false);
                     int oppX;
                     int oppY;
                     int oppXNEW;
                     int oppYNEW;
+
+                    //Prima protivnicki potez za servera
                     try {
                         oppX = opponentMoveReader.readInt();
                         oppY = opponentMoveReader.readInt();
@@ -74,12 +81,14 @@ public class ChessClientMovesThread extends Thread{
                         e.printStackTrace();
                     }
 
-
+                    //opponentMove() postavlja gameOver boolean na true ako se partija zavrsila sa primljenim potezom
                     if(parentApp.isGameOver()) {
                         break;
                     }
 
                     parentApp.setYourTurn(true);
+
+                    //Ceka potez iz glavne aplikacije
                     try {
                         synchronized (parentApp.getMove()) {
                             parentApp.getMove().wait();
@@ -91,6 +100,7 @@ public class ChessClientMovesThread extends Thread{
                     int[] move = parentApp.getMove();
                     StringBuilder s = new StringBuilder("sending move: ");
 
+                    //Salje potez na server
                     for (int a : move) {
                         try {
                             moveSender.writeInt(a);
@@ -101,13 +111,11 @@ public class ChessClientMovesThread extends Thread{
                         }
                     }
                     System.out.println(s);
-                    parentApp.setYourTurn(false);
 
                     if(parentApp.isGameOver())
                         break;
                 }
             }
-            System.out.println("exited thread");
         } catch (IOException e) {
             e.printStackTrace();
         }

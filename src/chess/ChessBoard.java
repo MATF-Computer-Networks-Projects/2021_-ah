@@ -22,6 +22,7 @@ public class ChessBoard {
     }
 
     public void setPiece(ChessPiece piece, int x, int y){
+        //Salje signal aplikaciji da treba da izvrsi promenu na GUI tabli
         support.firePropertyChange("piece", pieces[x][y], piece);
         pieces[x][y] = piece;
     }
@@ -60,7 +61,7 @@ public class ChessBoard {
 
     }
 
-
+    //Korisceno za testiranje backend implementacije dok nije postojao GUI
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();

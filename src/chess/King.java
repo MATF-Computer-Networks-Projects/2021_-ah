@@ -25,6 +25,7 @@ public class King extends ChessPiece {
 
     @Override
     public boolean move(ChessBoard board, int xnew, int ynew){
+
         if(Math.abs(ynew - y) != 1 && Math.abs(xnew - x) != 1)
             return false;
 

@@ -32,6 +32,7 @@ import java.net.Socket;
 import java.util.*;
 
 public class ChessClientApplication extends Application implements PropertyChangeListener {
+
     private ChessClient client;
 
     private ChessClientMovesThread moveThread;
@@ -40,11 +41,12 @@ public class ChessClientApplication extends Application implements PropertyChang
     private boolean yourTurn = false;
     private boolean gameOver = false;
 
-
+    //Ucitane slike za svaki tip figure
     Map<String, Image> images = new HashMap<>();
 
     private ChessBoard board;
 
+    //Potez koji aplikacija salje serveru (x, y, xnew, ynew)
     int[] move = new int[4];
 
 
@@ -64,21 +66,20 @@ public class ChessClientApplication extends Application implements PropertyChang
 
         client = new ChessClient("localhost");
 
+        //Povezivanje na ChessServer
         Socket chessSocket = new Socket(client.getHostname(), ChessMoveServer.MOVE_SERVER_PORT);
 
+        //Dobijanje tima
         getTeam(chessSocket);
 
+        //Povezivanje na ChatServer
         Socket chatSocket = new Socket(client.getHostname(), ChessChatServer.CHAT_SERVER_PORT);
 
-
         TextFlow textflow = new TextFlow();
-
         ScrollPane sp = new ScrollPane();
-
         TextField message = new TextField();
 
         pane = new GridPane();
-
         pane.setGridLinesVisible(true);
 
         board = new ChessBoard();
@@ -86,17 +87,22 @@ public class ChessClientApplication extends Application implements PropertyChang
 
         loadImages();
 
-//        pane.setPadding(new Insets(50, 50, 50, 50));
         pane.setVgap(2);
         pane.setHgap(2);
 
+        //Inicijalizuje GridPane i daje dugmicima funkcionalnost
         initialize();
-        VBox chatBox = initializeChat(textflow, sp, message);
 
+
+        //Konstruisanje niti
         moveThread = new ChessClientMovesThread(chessSocket, this);
         ChessClientReadThread chatReadThread = new ChessClientReadThread(chatSocket, textflow, client.getTeam());
         ChessClientWriteThread chatWriteThread = new ChessClientWriteThread(chatSocket, textflow, message, client.getTeam());
 
+        //Pravi VBox za chat elemente
+        VBox chatBox = initializeChat(textflow, sp, message);
+
+        //Pravi VBox za GUI elemente saha
         VBox chessBox = new VBox();
         chessBox.setPadding(new Insets(50, 50, 50, 50));
         chessBox.setAlignment(Pos.CENTER);
@@ -104,6 +110,8 @@ public class ChessClientApplication extends Application implements PropertyChang
         turnLabel.setPadding(new Insets(0, 0, 15, 0));
         chessBox.getChildren().add(turnLabel);
         chessBox.getChildren().add(pane);
+
+        //Povezuje dva VBoxa
         HBox hbox = new HBox(chessBox, chatBox);
 
         Scene scene = new Scene(hbox);
@@ -111,6 +119,7 @@ public class ChessClientApplication extends Application implements PropertyChang
 
         stage.show();
 
+        //Pokretanje niti
         moveThread.start();
         chatReadThread.start();
         chatWriteThread.start();
@@ -135,6 +144,7 @@ public class ChessClientApplication extends Application implements PropertyChang
 
 
     private void initialize(){
+        //Za naizmenicno bojenje polja
         boolean grey = true;
 
         for(int i = 0; i < 8; i++) {
@@ -146,6 +156,7 @@ public class ChessClientApplication extends Application implements PropertyChang
 
 
                 if(i<2 || i>5){
+                    //Dodaje slike figura na odgovarajuca polja
                     //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
                     String s = board.getPiece(j, i).getImgFile() + ".png";
                     Image image = images.get(s);
@@ -161,13 +172,14 @@ public class ChessClientApplication extends Application implements PropertyChang
                 else
                     button.setStyle("-fx-background-color: White");
 
+                //Ubacuje na razlicite koordinate u zavisnosti od tima kako bi dobio pravilnu orijentaciju table
                 if(client.getTeam()==Team.WHITE)
                     pane.add(button, j, 7-i);
                 else
                     pane.add(button, 7-j, i);
 
 
-
+                //Postavlja funkcionalnost dugmica
                 button.setOnMouseClicked( e -> {
 
                     //Biranje prvog polja u potezu
@@ -176,20 +188,19 @@ public class ChessClientApplication extends Application implements PropertyChang
                         if(client.getTeam()==Team.WHITE){
                             move[0] = GridPane.getColumnIndex(button);
                             move[1] = 7 - GridPane.getRowIndex(button);
-//                            x = GridPane.getColumnIndex(button);
-//                            y = 7-GridPane.getRowIndex(button);
                         }
                         else{
                             move[0] = 7 - GridPane.getColumnIndex(button);
                             move[1] = GridPane.getRowIndex(button);
-//                            x = 7-GridPane.getColumnIndex(button);
-//                            y = GridPane.getRowIndex(button);
                         }
 
+                        //Ako nema figure na odabranom polju
                         if(board.getPiece(move[0], move[1])==null)
                             System.out.println("No piece");
+                        //Ako je odabrana figura iz suprotnog tima
                         else if(board.getPiece(move[0], move[1]).getTeam()!=client.getTeam())
                             System.out.println("Wrong team");
+                        //Bira figuru
                         else {
                             System.out.println(board.getPiece(move[0], move[1]).getType());
                             buttonSelected = !buttonSelected;
@@ -200,25 +211,18 @@ public class ChessClientApplication extends Application implements PropertyChang
                         if(client.getTeam()==Team.WHITE){
                             move[2] = GridPane.getColumnIndex(button);
                             move[3] = 7-GridPane.getRowIndex(button);
-//                            xnew = GridPane.getColumnIndex(button);
-//                            ynew = 7-GridPane.getRowIndex(button);
                         }
                         else{
                             move[2] = 7-GridPane.getColumnIndex(button);
                             move[3] = GridPane.getRowIndex(button);
-//                            xnew = 7-GridPane.getColumnIndex(button);
-//                            ynew = GridPane.getRowIndex(button);
                         }
 
                         if(board.getPiece(move[0], move[1]).move(board, move[2], move[3])){
-
-                            //Prebacuje sliku figure na nove koordinate
-//                            moveThread.setMoveCoordinates(x, y, xnew, ynew);
-//                            moveThread.notify();
-//                            moveInUI(x, y, xnew, ynew);
+                            //Obavestava nit da je potez spreman za slanje na server
                             synchronized (move) {
                                 move.notify();
                             }
+                        //Potez nije dozvoljen
                         }else{
                             System.out.println("illegal move!");
                         }
@@ -230,40 +234,6 @@ public class ChessClientApplication extends Application implements PropertyChang
             grey = !grey;
         }
     }
-
-
-
-
-//    private void moveInUI(int x, int y, int xnew, int ynew){
-//        for(Node node : pane.getChildren()) {
-//            if(client.getTeam()==Team.WHITE) {
-//                if (node instanceof Button && GridPane.getColumnIndex(node).equals(x) && GridPane.getRowIndex(node).equals(7 - y)) {
-//
-//                    ((Button) node).setGraphic(null);
-//                } else if (node instanceof Button && GridPane.getColumnIndex(node).equals(xnew) && GridPane.getRowIndex(node).equals(7 - ynew)) {
-//
-//                    //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
-//                    String s = board.getPiece(xnew, ynew).getImgFile() + ".png";
-//                    Image image = images.get(s);
-//                    ImageView imageView = new ImageView(image);
-//                    ((Button) node).setGraphic(imageView);
-//                }
-//            }
-//            else {
-//                if (node instanceof Button && GridPane.getColumnIndex(node).equals(7-x) && GridPane.getRowIndex(node).equals(y)) {
-//
-//                    ((Button) node).setGraphic(null);
-//                } else if (node instanceof Button && GridPane.getColumnIndex(node).equals(7-xnew) && GridPane.getRowIndex(node).equals(ynew)) {
-//
-//                    //Ako bih sve uradio u jednoj liniji, program bi izbacivao "Invalid URL or resource not found" gresku
-//                    String s = board.getPiece(xnew, ynew).getImgFile() + ".png";
-//                    Image image = images.get(s);
-//                    ImageView imageView = new ImageView(image);
-//                    ((Button) node).setGraphic(imageView);
-//                }
-//            }
-//        }
-//    }
 
     private void loadImages() {
 
@@ -323,9 +293,9 @@ public class ChessClientApplication extends Application implements PropertyChang
             if(evt.getOldValue() != null && ((ChessPiece) evt.getOldValue()).getType().equals("king")){
                 gameOver = true;
                 if(((ChessPiece) evt.getOldValue()).getTeam().equals(Team.BLACK))
-                    System.out.println("White wins");
+                    turnLabel.setText("WHITE WINS");
                 else
-                    System.out.println("Black wins");
+                    turnLabel.setText("BLACK WINS");
             }
             for(Node node : pane.getChildren()) {
 
@@ -376,25 +346,15 @@ public class ChessClientApplication extends Application implements PropertyChang
         return gameOver;
     }
 
-    //    public int[] getMove(){
-//        return new int[]{x, y, xnew, ynew};
-//    }
-
     public void opponentMove(int x, int y, int xnew, int ynew){
 
-
+        //Zavrsava partiju u slucaju da je jedan tim izgubio
         if(board.getPiece(xnew, ynew) != null && board.getPiece(xnew, ynew).getType().equals("king"))
             gameOver = true;
+
         //Metoda se pokrece samo iz moveThread niti, pa je potrebno dodati runLater jer menja GUI
         Platform.runLater(() -> board.getPiece(x, y).move(board, xnew, ynew));
 
     }
 
-//    public void receiveMessage(Text message){
-//        Platform.runLater(new Runnable(){
-//            public void run() {
-//                textFlow.getChildren().add(new Text("Player 2: \n"+message+"\n"));
-//            }
-//        });
-//    }
 }

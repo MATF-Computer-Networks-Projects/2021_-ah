@@ -47,38 +47,7 @@ public class Bishop extends ChessPiece{
 
         return list;
 
-//Losija verzija. Sacuvana za slucaj da bolja verzija ne funkcionise
-//        int i = x;
-//        int j = y;
-//        while(i<7 && j<7){
-//            i++;
-//            j++;
-//            list.add(new int[]{i, j});
-//        }
-//
-//        i = x;
-//        j = y;
-//        while(i<7 && j>0){
-//            i++;
-//            j--;
-//            list.add(new int[]{i, j});
-//        }
-//
-//        i = x;
-//        j = y;
-//        while(i>0 && j<7){
-//            i--;
-//            j++;
-//            list.add(new int[]{i, j});
-//        }
-//
-//        i = x;
-//        j = y;
-//        while(i>0 && j>0){
-//            i--;
-//            j--;
-//            list.add(new int[]{i, j});
-//        }
+
 
     }
 
@@ -92,6 +61,7 @@ public class Bishop extends ChessPiece{
         if(Math.abs(difx) != Math.abs(dify))
             return false;
 
+        //Provera da li se negde na putu nalazi druga figure
         for(int i=1; i<Math.abs(difx); i++)
             if(board.getPiece(x+Integer.signum(difx)*i, y+Integer.signum(dify)*i) != null)
                 return false;
@@ -105,9 +75,6 @@ public class Bishop extends ChessPiece{
             board.setPiece(this, xnew, ynew);
             return true;
         }
-
-
-
         return false;
     }
 

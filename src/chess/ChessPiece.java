@@ -26,6 +26,7 @@ public abstract class ChessPiece {
         return team;
     }
 
+    //Vraca ime png fajla za ucitavanje slika u glavnoj aplikaciji
     public String getImgFile(){
         String teamChar;
         if(team == Team.WHITE)

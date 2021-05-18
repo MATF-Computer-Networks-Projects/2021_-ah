@@ -21,7 +21,7 @@ public class ChessChatServer {
 
     private void execute() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-
+            //Prima dva korisnika i pokrece niti za svakog od njih
             for(int i = 0; i<2; i++){
                 Socket socket = serverSocket.accept();
                 users[i] = new ChatUserThread(socket, this, i);
@@ -35,6 +35,7 @@ public class ChessChatServer {
         }
     }
 
+    //Salje poruku drugom korisniku
     public void broadcast(String clientMessage, int index) {
         users[1-index].sendMessage(clientMessage);
     }
