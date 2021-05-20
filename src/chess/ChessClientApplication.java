@@ -133,6 +133,7 @@ public class ChessClientApplication extends Application implements PropertyChang
         sp.setPrefSize(200, 520);
         sp.setStyle("-fx-background-color: black");
         sp.setContent(chat);
+        sp.vvalueProperty().bind(chat.heightProperty());
         message.setPrefSize(200, 20);
         VBox chatBox = new VBox();
         chatBox.getChildren().add(0, message);
